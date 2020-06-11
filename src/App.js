@@ -32,8 +32,28 @@ class App extends Component {
     this.state = {
       input: '',
       imageUrl: '',
+      box: {},
     };
   }
+
+  calcFaceLocation = data => {
+    const clarigaiFace =
+      data.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById('inputImage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return {
+      leftCol: clarigaiFace.left_col * width,
+      topRow: clarigaiFace.top_row * height,
+      rightCol: width - clarigaiFace.right_col * width,
+      bottomRow: height - clarigaiFace.bottom_row * height,
+    };
+  };
+
+  displayFaceBox = box => {
+    console.log(box);
+    this.setState({ box: box });
+  };
 
   onInputChange = event => {
     this.setState({ input: event.target.value });
@@ -41,14 +61,10 @@ class App extends Component {
 
   onSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input).then(
-      function (response) {
-        console.log(response.outputs[0].data.regions[0].region_info.bounding_box);
-      },
-      function (err) {
-        // there was an error
-      }
-    );
+    app.models
+      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+      .then(response => this.displayFaceBox(this.calcFaceLocation(response)))
+      .catch(err => console.log(err));
   };
 
   render() {
@@ -62,7 +78,7 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onSubmit={this.onSubmit}
         />
-        <FaceRecognition imageUrl={this.state.imageUrl} />
+        <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} />
       </div>
     );
   }
@@ -70,16 +86,4 @@ class App extends Component {
 
 export default App;
 
-/*
-app.models
-.predict(
-Clarifai.COLOR_MODEL,
-    URL
-    "https://samples.clarifai.com/metro-north.jpg"
-)
-.then(function(response) {
-    do something with responseconsole.log(response);
-    },
-    function(err) {// there was an error}
-);
-*/
+
