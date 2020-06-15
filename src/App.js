@@ -40,6 +40,12 @@ class App extends Component {
     };
   }
 
+  // componentDidMount() {
+  //   fetch('http://localhost:4000')
+  //     .then(response => response.json())
+  //     .then(console.log);
+  // }
+
   calcFaceLocation = data => {
     const clarigaiFace =
       data.outputs[0].data.regions[0].region_info.bounding_box;
