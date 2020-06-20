@@ -9,12 +9,7 @@ import Signin from './components/Signin/Signin.components';
 import Register from './components/Register/Register.components';
 
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
 import './App.css';
-
-const app = new Clarifai.App({
-  apiKey: '',
-});
 
 const particlesOptions = {
   particles: {
@@ -85,11 +80,17 @@ class App extends Component {
 
   onSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models
-      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+    fetch('http://localhost:5000/imageurl', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: this.state.input,
+      }),
+    })
+      .then(response => response.json())
       .then(response => {
         if (response) {
-          fetch('http://localhost:4000/image', {
+          fetch('http://localhost:5000/image', {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
